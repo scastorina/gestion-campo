@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useContext } from "react";
-import MainMenu from "../components/MainMenu";
 import { db, auth } from "../firebase/config";
 import { collection, getDocs, updateDoc, doc, setDoc, query, where } from "firebase/firestore";
 import { createUserWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
@@ -245,9 +244,7 @@ function Users() {
   const esAdmin = usuarios.find(u => u.id === usuarioActual?.uid)?.rol === "admin";
 
   return (
-    <div>
-      <MainMenu />
-      <div className="max-w-5xl mx-auto my-8 p-6 bg-white rounded-xl shadow">
+    <div className="max-w-5xl mx-auto my-8 p-6 bg-white rounded-xl shadow">
         <h2 className="text-2xl font-bold mb-4">Gestión de Usuarios</h2>
 
         {/* FORMULARIO DE CREACIÓN */}
@@ -521,7 +518,6 @@ function Users() {
           <div className="text-center text-gray-400 py-8">Sin usuarios encontrados</div>
         )}
       </div>
-    </div>
   );
 }
 
