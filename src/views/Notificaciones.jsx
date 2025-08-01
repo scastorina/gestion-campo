@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import MainMenu from "../components/MainMenu";
 import { db } from "../firebase/config";
 import { collection, query, where, getDocs, updateDoc, doc } from "firebase/firestore";
 
@@ -42,9 +41,7 @@ function Notificaciones() {
   };
 
   return (
-    <div>
-      <MainMenu />
-      <div className="pl-56 p-8">
+    <div className="p-8">
         <h1 className="text-2xl font-bold mb-4">Notificaciones</h1>
         {cargando && <div className="mb-4">Cargando notificaciones...</div>}
         {notifs.length > 0 && (
@@ -92,7 +89,6 @@ function Notificaciones() {
           ))}
         </div>
       </div>
-    </div>
   );
 }
 
