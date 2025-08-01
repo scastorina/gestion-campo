@@ -1,16 +1,24 @@
 import React, { useEffect, useState } from "react";
 import { db } from "../firebase/config";
 import {
-  collection, getDocs, addDoc, updateDoc, doc, deleteDoc
+  collection,
+  getDocs,
+  addDoc,
+  updateDoc,
+  doc,
+  deleteDoc,
+  where,
+  query
 } from "firebase/firestore";
 
-async function enviarNotificacion({ para, titulo, texto, link = "" }) {
+async function enviarNotificacion({ para, titulo, texto, link = "", ordenId }) {
   await addDoc(collection(db, "notificaciones"), {
     para,
     titulo,
     texto,
     leido: false,
     link,
+    ordenId,
     fecha: new Date().toISOString()
   });
 }
@@ -83,7 +91,8 @@ function Ordenes({ usuario }) {
       para: orden.asignadoA,
       titulo: "Nueva Orden de Trabajo asignada",
       texto: `Te han asignado la orden "${orden.titulo}".`,
-      link: `/ordenes`
+      link: `/ordenes`,
+      ordenId: ref.id
     });
   };
 
@@ -106,7 +115,8 @@ function Ordenes({ usuario }) {
           para: orden.creador,
           titulo: "Orden de trabajo actualizada",
           texto: textoNotif,
-          link: "/ordenes"
+          link: "/ordenes",
+          ordenId: id
         });
       }
       if (
@@ -118,7 +128,8 @@ function Ordenes({ usuario }) {
           para: orden.asignadoA,
           titulo: "Orden de trabajo actualizada",
           texto: textoNotif,
-          link: "/ordenes"
+          link: "/ordenes",
+          ordenId: id
         });
       }
     }
@@ -132,6 +143,10 @@ function Ordenes({ usuario }) {
     if (!puedeEditar(orden)) return;
     if (!window.confirm("¿Eliminar orden?")) return;
     await deleteDoc(doc(db, "ordenes", id));
+    // Borrar notificaciones relacionadas
+    const q = query(collection(db, "notificaciones"), where("ordenId", "==", id));
+    const snap = await getDocs(q);
+    snap.forEach(n => deleteDoc(doc(db, "notificaciones", n.id)));
     setOrdenes(ordenes.filter(o => o.id !== id));
   };
 
@@ -154,7 +169,8 @@ function Ordenes({ usuario }) {
         para: orden.creador,
         titulo: "Nueva respuesta a tu Orden de Trabajo",
         texto: `El usuario ${nuevaResp.autor} respondió la orden "${orden.titulo}".`,
-        link: `/ordenes`
+        link: `/ordenes`,
+        ordenId: id
       });
     }
     if (
@@ -166,7 +182,8 @@ function Ordenes({ usuario }) {
         para: orden.asignadoA,
         titulo: "Nueva respuesta en Orden asignada",
         texto: `El usuario ${nuevaResp.autor} respondió la orden "${orden.titulo}".`,
-        link: `/ordenes`
+        link: `/ordenes`,
+        ordenId: id
       });
     }
   };
