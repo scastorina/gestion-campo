@@ -8,7 +8,7 @@ function MainLayout({ usuario, children }) {
       <Sidebar />
       <Header usuario={usuario} />
       <main className="pl-56 pt-20 pr-6 pb-6">
-        {children}
+        {React.cloneElement(children, { usuario })}
       </main>
     </div>
   );
