@@ -1,0 +1,19 @@
+# node modules y build
+node_modules/
+dist/
+
+# logs y debug
+*.log
+
+# variables de entorno (por si usas)
+.env*
+# caché y otras carpetas temporales
+.cache/
+.vite/
+
+# IDEs
+.vscode/
+
+# Sistema
+.DS_Store
+Thumbs.db
