@@ -2,8 +2,7 @@ import React, { useEffect, useState } from "react";
 import { db } from "../firebase/config";
 import { collection, query, where, getDocs, updateDoc, doc } from "firebase/firestore";
 
-function Notificaciones() {
-  const usuario = JSON.parse(localStorage.getItem("usuarioManual"));
+function Notificaciones({ usuario }) {
   const [notifs, setNotifs] = useState([]);
   const [cargando, setCargando] = useState(true);
 
