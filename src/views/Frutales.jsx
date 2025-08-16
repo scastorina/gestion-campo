@@ -1,14 +1,6 @@
-import React, { useState } from "react";
-
-const empleados = [
-  "Basualdo Dardo",
-  "Ruiz Mario",
-  "Salinas Anibal",
-  "Salinas Sergio",
-  "Sanchez Agustin",
-  "Suarez Jeremias",
-  "Zalazar Lucas"
-];
+import React, { useState, useEffect } from "react";
+import { db } from "../firebase/config";
+import { collection, query, where, getDocs } from "firebase/firestore";
 
 const cecos = [
   { value: "NOGA11", label: "Nogales Chacra Vieja" },
@@ -77,6 +69,24 @@ const Frutales = () => {
     horas_extra: 0,
     guardia: ""
   });
+  const [empleados, setEmpleados] = useState([]);
+
+  useEffect(() => {
+    const cargarEmpleados = async () => {
+      try {
+        const q = query(
+          collection(db, "usuarios"),
+          where("areas", "array-contains", "Frutales"),
+          where("activo", "==", true)
+        );
+        const snapshot = await getDocs(q);
+        setEmpleados(snapshot.docs.map(doc => doc.data().nombre));
+      } catch (error) {
+        console.error("Error al cargar empleados:", error);
+      }
+    };
+    cargarEmpleados();
+  }, []);
 
   const handleChange = e => {
     const { name, value } = e.target;
