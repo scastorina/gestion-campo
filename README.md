@@ -1,17 +1,30 @@
 # Gestion Campo
 
-This project primarily contains a React front-end. A new **backend** folder has been added containing a Dash application for the Frutales section.
+This repository now includes a simple irrigation (riegos) management demo alongside the original React front-end.
 
-## Running the Dash app
+## Backend de Riegos (Flask)
 
-1. Install Python dependencies:
+1. Instalar dependencias de Python:
    ```bash
    pip install -r backend/requirements.txt
    ```
-2. Run the application:
+2. Ejecutar el servidor Flask:
    ```bash
    python backend/app.py
    ```
-   The server will start on `http://127.0.0.1:8050` by default.
+   El API queda disponible en `http://127.0.0.1:5000/api/riegos` y utiliza una base SQLite que se genera automáticamente en `backend/lotes.db`.
 
-The Dash app communicates with the ODK API defined in `backend/app.py` and mirrors the Frutales control interface.
+## Frontend simple
+
+Servir la carpeta `frontend/` con cualquier servidor de archivos estáticos, por ejemplo:
+```bash
+python -m http.server --directory frontend
+```
+El mapa (Leaflet) permite seleccionar un lote, guardar un riego y listar el historial.
+
+## Dash app original
+
+La aplicación Dash previa se conserva en `backend/dash_app.py` y puede ejecutarse igual que antes:
+```bash
+python backend/dash_app.py
+```

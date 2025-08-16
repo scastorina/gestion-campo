@@ -2,3 +2,5 @@ dash
 pandas
 requests
 python-dateutil
+Flask
+flask-cors
