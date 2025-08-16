@@ -10,6 +10,7 @@ dist/
 # caché y otras carpetas temporales
 .cache/
 .vite/
+__pycache__/
 
 # IDEs
 .vscode/
@@ -17,3 +18,4 @@ dist/
 # Sistema
 .DS_Store
 Thumbs.db
+*.db
