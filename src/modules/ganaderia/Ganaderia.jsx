@@ -92,7 +92,8 @@ function useCategorias(actividad) {
       (snap) => {
         if (snap.empty) {
           setCategorias([]);
-          setError("Sin datos o permisos");
+          console.log("Sin categorías registradas");
+          setError(null);
           return;
         }
         const arr = snap.docs.map((d) => {
@@ -570,7 +571,7 @@ export default function Ganaderia() {
 
         {categorias.length === 0 && !categoriasError && (
           <div className="mb-4 p-2 rounded bg-yellow-100 text-yellow-800">
-            No hay categorías disponibles
+            Sin categorías registradas
           </div>
         )}
 
