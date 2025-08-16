@@ -11,6 +11,7 @@ import {
   where,
   orderBy,
   serverTimestamp,
+  getDocs,
 } from "firebase/firestore";
 import { Plus, Edit2, Trash2 } from "lucide-react";
 
@@ -74,16 +75,15 @@ function Field({ label, children, className = "" }) {
 function useCategorias(actividad) {
   const [categorias, setCategorias] = useState([]);
   useEffect(() => {
-    const qRef = collection(db, "categorias");
-    const unsub = onSnapshot(qRef, (snap) => {
-      let arr = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-      if (actividad) {
-        arr = arr.filter((c) => !c.actividad || c.actividad === actividad);
-      }
+    const qRef = actividad
+      ? query(collection(db, "categorias"), where("actividad", "==", actividad))
+      : collection(db, "categorias");
+    getDocs(qRef).then((snap) => {
+      const arr = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      // Ordenar alfabético por nombre
       arr.sort((a, b) => (a.nombre || "").localeCompare(b.nombre || ""));
       setCategorias(arr);
     });
-    return () => unsub();
   }, [actividad]);
   return categorias;
 }
