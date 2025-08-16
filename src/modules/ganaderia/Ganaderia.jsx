@@ -74,18 +74,28 @@ function Field({ label, children, className = "" }) {
 
 function useCategorias(actividad) {
   const [categorias, setCategorias] = useState([]);
+  const [error, setError] = useState(null);
   useEffect(() => {
     const qRef = actividad
       ? query(collection(db, "categorias"), where("actividad", "==", actividad))
       : collection(db, "categorias");
-    getDocs(qRef).then((snap) => {
-      const arr = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-      // Ordenar alfabético por nombre
-      arr.sort((a, b) => (a.nombre || "").localeCompare(b.nombre || ""));
-      setCategorias(arr);
-    });
+    const unsub = onSnapshot(
+      qRef,
+      (snap) => {
+        const arr = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        // Ordenar alfabético por nombre
+        arr.sort((a, b) => (a.nombre || "").localeCompare(b.nombre || ""));
+        setCategorias(arr);
+        setError(null);
+      },
+      (error) => {
+        console.error(error);
+        setError(error.message || "Error al cargar categorías");
+      }
+    );
+    return () => unsub();
   }, [actividad]);
-  return categorias;
+  return { categorias, error };
 }
 
 function useMovimientos(actividad) {
@@ -443,7 +453,7 @@ function ResumenMensualTabla({ resumen }) {
 export default function Ganaderia() {
   const [actividad, setActividad] = useState("invernada"); // invernada | cria
   const [tab, setTab] = useState("entradas");
-  const categorias = useCategorias(actividad);
+  const { categorias, error: categoriasError } = useCategorias(actividad);
   const movimientos = useMovimientos(actividad);
   const [editing, setEditing] = useState(null);
   const [showForm, setShowForm] = useState(false);
@@ -518,21 +528,27 @@ export default function Ganaderia() {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2 mb-4">
-        {TABS.map((t) => (
-          <button
-            key={t.key}
-            className={`px-3 py-1 rounded-2xl border ${tab===t.key ? "bg-blue-600 text-white border-blue-600" : "bg-white"}`}
-            onClick={() => setTab(t.key)}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
+        <div className="flex flex-wrap gap-2 mb-4">
+          {TABS.map((t) => (
+            <button
+              key={t.key}
+              className={`px-3 py-1 rounded-2xl border ${tab===t.key ? "bg-blue-600 text-white border-blue-600" : "bg-white"}`}
+              onClick={() => setTab(t.key)}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
 
-      {tab === "resumen" ? (
-        <ResumenMensualTabla resumen={resumen} />
-      ) : (
+        {categoriasError && (
+          <div className="mb-4 p-2 rounded bg-red-100 text-red-800">
+            Error cargando categorías: {categoriasError}
+          </div>
+        )}
+
+        {tab === "resumen" ? (
+          <ResumenMensualTabla resumen={resumen} />
+        ) : (
         <>
           {showForm && (
             <div className="bg-white rounded-2xl shadow p-4 mb-4">
