@@ -1,9 +1,6 @@
-import { initializeApp } from "firebase/app";
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
-import { firebaseConfig } from "./config"; // Usa tu propia config
+import { app } from "./config";
 
-// Inicializa Firebase App
-const app = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);
 
 // Pide permiso, obtiene token y lo devuelve (o null si usuario no acepta)
