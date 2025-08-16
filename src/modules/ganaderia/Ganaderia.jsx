@@ -90,6 +90,11 @@ function useCategorias(actividad) {
     const unsub = onSnapshot(
       qRef,
       (snap) => {
+        if (snap.empty) {
+          setCategorias([]);
+          setError("Sin datos o permisos");
+          return;
+        }
         const arr = snap.docs.map((d) => {
           const data = d.data();
           const actNorm = normalizeText(data.actividad);
@@ -561,6 +566,12 @@ export default function Ganaderia() {
         {categoriasError && (
           <div className="mb-4 p-2 rounded bg-red-100 text-red-800">
             Error cargando categorías: {categoriasError}
+          </div>
+        )}
+
+        {categorias.length === 0 && !categoriasError && (
+          <div className="mb-4 p-2 rounded bg-yellow-100 text-yellow-800">
+            No hay categorías disponibles
           </div>
         )}
 
