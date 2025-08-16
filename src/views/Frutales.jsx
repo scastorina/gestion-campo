@@ -1,64 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { db } from "../firebase/config";
 import { collection, query, where, getDocs } from "firebase/firestore";
+import {
+  getCostCenters,
+  getTasks,
+  saveCostCenter,
+  saveTask,
+} from "../firebase/firestore";
 
-const cecos = [
-  { value: "NOGA11", label: "Nogales Chacra Vieja" },
-  { value: "NOGA12", label: "Nogales Pivot" },
-  { value: "BAPRO", label: "Viña Barda" },
-  { value: "VIEPRO", label: "Viña Chacra Vieja" },
-  { value: "PIN22", label: "Viña 2022 Pinot" },
-  { value: "AVE13", label: "Avellana 2013/2014" },
-  { value: "RIGRA", label: "Riego Gravedad" },
-  { value: "RIGOT", label: "Riego Goteo (Viña Barda)" },
-  { value: "ASP11", label: "Riego Goteo (Chacra Vieja)" },
-  { value: "ASP12", label: "Riego Goteo (Pivot)" },
-  { value: "MAQUI", label: "Maquinarias (Tareas sobre tractor)" },
-  { value: "Mantenimiento", label: "Mantenimiento" },
-  { value: "Faltas", label: "Faltas" },
-  { value: "Rivera Grande", label: "Rivera Grande" }
-];
-
-const tareas = [
-  "Estirar Alambre",
-  "Postes",
-  "Poda",
-  "Subsolador",
-  "Corte de ramas",
-  "Mantenimiento",
-  "Motoguadaña",
-  "Aplicación de herbicida",
-  "Mantenimiento del riego",
-  "Riego",
-  "Limpieza Leñosas",
-  "Azada",
-  "Rastra de Disco",
-  "Picadora",
-  "Pulverizacion",
-  "Desmalezar",
-  "Sacar Ramas tractor",
-  "Acordonar Ramas",
-  "Pintar Cortes",
-  "Quemar ramas",
-  "Acomodar plantas",
-  "Feriado",
-  "Falta",
-  "Falta con aviso",
-  "Vacaciones",
-  "Cocina",
-  "Nivelador",
-  "Fertilizacion",
-  "Control de Heladas",
-  "Control de Temperatura",
-  "Cosecha",
-  "Mantenimiento Cosecha",
-  "Mugrones",
-  "Control de Fuego"
-];
 
 const opcionesGuardia = ["Si", "No"];
 
-const Frutales = () => {
+const Frutales = ({ usuario }) => {
   const [formData, setFormData] = useState({
     fecha: new Date().toISOString().split("T")[0],
     empleado: "",
@@ -70,9 +23,14 @@ const Frutales = () => {
     guardia: ""
   });
   const [empleados, setEmpleados] = useState([]);
+  const [cecos, setCecos] = useState([]);
+  const [tareas, setTareas] = useState([]);
+
+  const canEdit =
+    usuario?.rol === "admin" && (usuario?.areas || []).includes("Administración");
 
   useEffect(() => {
-    const cargarEmpleados = async () => {
+    const cargarDatos = async () => {
       try {
         const q = query(
           collection(db, "usuarios"),
@@ -81,11 +39,18 @@ const Frutales = () => {
         );
         const snapshot = await getDocs(q);
         setEmpleados(snapshot.docs.map(doc => doc.data().nombre));
+
+        const [cecosData, tareasData] = await Promise.all([
+          getCostCenters(),
+          getTasks(),
+        ]);
+        setCecos(cecosData);
+        setTareas(tareasData);
       } catch (error) {
-        console.error("Error al cargar empleados:", error);
+        console.error("Error al cargar datos:", error);
       }
     };
-    cargarEmpleados();
+    cargarDatos();
   }, []);
 
   const handleChange = e => {
@@ -96,6 +61,34 @@ const Frutales = () => {
   const handleSubmit = e => {
     e.preventDefault();
     console.log("Formulario Frutales", formData);
+  };
+
+  const handleEditCeco = async () => {
+    const actual = cecos.find(c => c.nombre === formData.ceco);
+    const nombre = prompt("Centro de Costo", actual?.nombre || "");
+    if (nombre) {
+      const id = await saveCostCenter({ nombre }, actual?.id);
+      if (actual) {
+        setCecos(prev => prev.map(c => (c.id === id ? { ...c, nombre } : c)));
+        setFormData(prev => ({ ...prev, ceco: nombre }));
+      } else {
+        setCecos(prev => [...prev, { id, nombre }]);
+      }
+    }
+  };
+
+  const handleEditTarea = async () => {
+    const actual = tareas.find(t => t.nombre === formData.tarea);
+    const nombre = prompt("Tarea", actual?.nombre || "");
+    if (nombre) {
+      const id = await saveTask({ nombre }, actual?.id);
+      if (actual) {
+        setTareas(prev => prev.map(t => (t.id === id ? { ...t, nombre } : t)));
+        setFormData(prev => ({ ...prev, tarea: nombre }));
+      } else {
+        setTareas(prev => [...prev, { id, nombre }]);
+      }
+    }
   };
 
   return (
@@ -136,38 +129,60 @@ const Frutales = () => {
 
         <div>
           <label className="block font-medium">Centro de Costo</label>
-          <select
-            name="ceco"
-            value={formData.ceco}
-            onChange={handleChange}
-            className="mt-1 p-2 border rounded w-full"
-            required
-          >
-            <option value="">Seleccione</option>
-            {cecos.map(c => (
-              <option key={c.value} value={c.value}>
-                {c.label}
-              </option>
-            ))}
-          </select>
+          <div className="flex gap-2">
+            <select
+              name="ceco"
+              value={formData.ceco}
+              onChange={handleChange}
+              className="mt-1 p-2 border rounded w-full"
+              required
+            >
+              <option value="">Seleccione</option>
+              {cecos.map(c => (
+                <option key={c.id} value={c.nombre}>
+                  {c.nombre}
+                </option>
+              ))}
+            </select>
+            {canEdit && (
+              <button
+                type="button"
+                onClick={handleEditCeco}
+                className="bg-yellow-500 text-white px-2 rounded"
+              >
+                Editar
+              </button>
+            )}
+          </div>
         </div>
 
         <div>
           <label className="block font-medium">Tarea</label>
-          <select
-            name="tarea"
-            value={formData.tarea}
-            onChange={handleChange}
-            className="mt-1 p-2 border rounded w-full"
-            required
-          >
-            <option value="">Seleccione</option>
-            {tareas.map(t => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
-          </select>
+          <div className="flex gap-2">
+            <select
+              name="tarea"
+              value={formData.tarea}
+              onChange={handleChange}
+              className="mt-1 p-2 border rounded w-full"
+              required
+            >
+              <option value="">Seleccione</option>
+              {tareas.map(t => (
+                <option key={t.id} value={t.nombre}>
+                  {t.nombre}
+                </option>
+              ))}
+            </select>
+            {canEdit && (
+              <button
+                type="button"
+                onClick={handleEditTarea}
+                className="bg-yellow-500 text-white px-2 rounded"
+              >
+                Editar
+              </button>
+            )}
+          </div>
         </div>
 
         {formData.tarea === "Falta con aviso" && (
