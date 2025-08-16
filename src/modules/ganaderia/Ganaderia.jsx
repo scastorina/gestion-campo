@@ -98,9 +98,8 @@ function useCategorias(actividad) {
         const arr = snap.docs.map((d) => {
           const data = d.data();
           const actNorm = normalizeText(data.actividad);
-          if (data.actividad !== actNorm) {
-            updateDoc(d.ref, { actividad: actNorm });
-          }
+          // Cualquier normalización necesaria debe realizarse en un script con permisos de escritura
+          // evitando escrituras desde el cliente por restricciones de seguridad.
           return { id: d.id, ...data, actividad: actNorm };
         });
         // Ordenar alfabético por nombre
