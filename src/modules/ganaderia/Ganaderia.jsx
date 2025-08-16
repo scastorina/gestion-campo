@@ -15,6 +15,10 @@ import {
 } from "firebase/firestore";
 import { Plus, Edit2, Trash2 } from "lucide-react";
 
+// Utilidad para normalizar strings eliminando acentos y pasando a minúsculas
+const normalizeText = (str = "") =>
+  str.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
+
 // === Utiles ===
 const ACTIVIDADES = [
   { value: "invernada", label: "Invernada" },
@@ -76,13 +80,24 @@ function useCategorias(actividad) {
   const [categorias, setCategorias] = useState([]);
   const [error, setError] = useState(null);
   useEffect(() => {
+    const actividadNormalizada = normalizeText(actividad);
     const qRef = actividad
-      ? query(collection(db, "categorias"), where("actividad", "==", actividad))
+      ? query(
+          collection(db, "categorias"),
+          where("actividad", "==", actividadNormalizada)
+        )
       : collection(db, "categorias");
     const unsub = onSnapshot(
       qRef,
       (snap) => {
-        const arr = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        const arr = snap.docs.map((d) => {
+          const data = d.data();
+          const actNorm = normalizeText(data.actividad);
+          if (data.actividad !== actNorm) {
+            updateDoc(d.ref, { actividad: actNorm });
+          }
+          return { id: d.id, ...data, actividad: actNorm };
+        });
         // Ordenar alfabético por nombre
         arr.sort((a, b) => (a.nombre || "").localeCompare(b.nombre || ""));
         setCategorias(arr);
@@ -101,9 +116,10 @@ function useCategorias(actividad) {
 function useMovimientos(actividad) {
   const [movs, setMovs] = useState([]);
   useEffect(() => {
+    const actividadNormalizada = normalizeText(actividad);
     const qRef = query(
       collection(db, "mov_ganaderia"),
-      where("actividad", "==", actividad),
+      where("actividad", "==", actividadNormalizada),
       orderBy("fechaTs", "asc")
     );
     const unsub = onSnapshot(qRef, (snap) => {
@@ -207,8 +223,10 @@ function MovimientoForm({ tipo, actividad, categorias, record, onCancel, onSaved
 
   const save = async (e) => {
     e.preventDefault();
+    const actividadNormalizada = normalizeText(form.actividad);
     const payload = {
       ...form,
+      actividad: actividadNormalizada,
       nCab: Number(form.nCab || 0) || 0,
       kgTotales: Number(form.kgTotales || 0) || 0,
       kgPorCab: Number(form.kgPorCab || 0) || 0,
