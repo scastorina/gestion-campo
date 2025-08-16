@@ -1,13 +1,20 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import {
-  Home, List, Bell, Users, Layers, Settings
+  Home,
+  List,
+  Bell,
+  Users,
+  Layers,
+  Settings,
+  Trees
 } from "lucide-react";
 
 const navItems = [
   { label: "Dashboard", to: "/dashboard", icon: <Home size={20} /> },
   { label: "Órdenes", to: "/ordenes", icon: <List size={20} /> },
   { label: "Ganadería", to: "/ganaderia", icon: <Layers size={20} /> },
+  { label: "Frutales", to: "/frutales", icon: <Trees size={20} /> },
   { label: "Usuarios", to: "/usuarios", icon: <Users size={20} /> },
   { label: "Notificaciones", to: "/notificaciones", icon: <Bell size={20} /> },
   { label: "Ajustes", to: "/ajustes", icon: <Settings size={20} /> }

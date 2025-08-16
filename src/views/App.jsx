@@ -7,6 +7,7 @@ import Ganaderia from "../modules/ganaderia/Ganaderia";
 import Ordenes from "./Ordenes";
 import Notificaciones from "./Notificaciones";
 import Dashboard from "./Dashboard";
+import Frutales from "./Frutales";
 import { AuthProvider, AuthContext } from "../context/AuthContext";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase/config";
@@ -92,6 +93,16 @@ function App() {
             <PrivateRoute areasPermitidas={["Ganadería"]}>
               <MainLayout>
                 <Ganaderia />
+              </MainLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/frutales"
+          element={
+            <PrivateRoute areasPermitidas={["Frutales"]}>
+              <MainLayout>
+                <Frutales />
               </MainLayout>
             </PrivateRoute>
           }
