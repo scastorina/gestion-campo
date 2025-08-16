@@ -81,7 +81,7 @@ function useCategorias(actividad) {
     getDocs(qRef).then((snap) => {
       const arr = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
       // Ordenar alfabético por nombre
-      arr.sort((a,b)=> (a.nombre||"").localeCompare(b.nombre||""));
+      arr.sort((a, b) => (a.nombre || "").localeCompare(b.nombre || ""));
       setCategorias(arr);
     });
   }, [actividad]);
