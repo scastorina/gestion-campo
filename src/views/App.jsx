@@ -3,7 +3,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "./Login";
 import UserDashboard from "./UserDashboard";
 import Users from "./Users";
-import Ganaderia from "./Ganaderia";
+import Ganaderia from "../modules/ganaderia/Ganaderia";
 import Ordenes from "./Ordenes";
 import Notificaciones from "./Notificaciones";
 import Dashboard from "./Dashboard";
